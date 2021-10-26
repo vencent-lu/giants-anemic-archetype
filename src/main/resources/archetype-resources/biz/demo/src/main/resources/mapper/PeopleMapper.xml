@@ -1,0 +1,157 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${package}.demo.dao.PeopleDao">
+
+    <resultMap type="${package}.demo.domain.People" id="PeopleMap">
+        <result property="peopleId" column="people_id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="sex" column="sex" jdbcType="TINYINT"/>
+        <result property="age" column="age" jdbcType="TINYINT"/>
+        <result property="birthday" column="birthday" jdbcType="VARCHAR"/>
+        <result property="emailAddress" column="email_address" jdbcType="VARCHAR"/>
+        <result property="mobileNumber" column="mobile_number" jdbcType="VARCHAR"/>
+        <result property="identityCardNo" column="identity_card_no" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="allSqlColumn">
+        people_id, name, sex, age, birthday, email_address, mobile_number, identity_card_no    
+    </sql>
+
+    <!--查询单个-->
+    <select id="get" resultMap="PeopleMap">
+        select
+        <include refid="allSqlColumn"/>
+        from people
+        where people_id = ${symbol_pound}{peopleId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="peopleId" useGeneratedKeys="true">
+        insert into people(name, sex, age, birthday, email_address, mobile_number, identity_card_no)
+        values (${symbol_pound}{name}, ${symbol_pound}{sex}, ${symbol_pound}{age}, ${symbol_pound}{birthday}, ${symbol_pound}{emailAddress}, ${symbol_pound}{mobileNumber}, ${symbol_pound}{identityCardNo})
+    </insert>
+
+    <insert id="insertAll" keyProperty="peopleId" useGeneratedKeys="true">
+        insert into people(name, sex, age, birthday, email_address, mobile_number, identity_card_no)
+        values
+        <foreach collection="list" item="entity" separator=",">
+            (${symbol_pound}{entity.name}, ${symbol_pound}{entity.sex}, ${symbol_pound}{entity.age}, ${symbol_pound}{entity.birthday}, ${symbol_pound}{entity.emailAddress},
+            ${symbol_pound}{entity.mobileNumber}, ${symbol_pound}{entity.identityCardNo})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update people
+        <set>
+            name = ${symbol_pound}{name}, sex = ${symbol_pound}{sex}, age = ${symbol_pound}{age}, birthday = ${symbol_pound}{birthday}, email_address = ${symbol_pound}{emailAddress},
+            mobile_number = ${symbol_pound}{mobileNumber}, identity_card_no = ${symbol_pound}{identityCardNo},
+        </set>
+        where people_id = ${symbol_pound}{peopleId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="delete">
+         delete from people where people_id = ${symbol_pound}{peopleId}    
+    </delete>
+
+    <sql id="entityWhereSql">
+        <where>
+            <if test="peopleId != null">
+                and people_id = ${symbol_pound}{peopleId}
+            </if>
+            <if test="name != null and name != ''">
+                and name = ${symbol_pound}{name}
+            </if>
+            <if test="sex != null">
+                and sex = ${symbol_pound}{sex}
+            </if>
+            <if test="age != null">
+                and age = ${symbol_pound}{age}
+            </if>
+            <if test="birthday != null">
+                and birthday = ${symbol_pound}{birthday}
+            </if>
+            <if test="emailAddress != null and emailAddress != ''">
+                and email_address = ${symbol_pound}{emailAddress}
+            </if>
+            <if test="mobileNumber != null and mobileNumber != ''">
+                and mobile_number = ${symbol_pound}{mobileNumber}
+            </if>
+            <if test="identityCardNo != null and identityCardNo != ''">
+                and identity_card_no = ${symbol_pound}{identityCardNo}
+            </if>
+        </where>
+    </sql>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="findByExample" resultMap="PeopleMap">
+        select
+        <include refid="allSqlColumn"/>
+        from people
+        <include refid="entityWhereSql"/>
+    </select>
+
+    <select id="findOneEntityByExample" resultMap="PeopleMap">
+        select
+        <include refid="allSqlColumn"/>
+        from people
+        <include refid="entityWhereSql"/>
+    </select>
+
+    <sql id="pageConditionWhereSql">
+        <where>
+            <if test="filters.peopleId != null">
+                and people_id = ${symbol_pound}{filters.peopleId}
+            </if>
+            <if test="filters.name != null and filters.name != ''">
+                and name like concat('%',${symbol_pound}{filters.name},'%')
+            </if>
+            <if test="filters.sex != null">
+                and sex = ${symbol_pound}{filters.sex}
+            </if>
+            <if test="filters.age != null">
+                and age = ${symbol_pound}{filters.age}
+            </if>
+            <if test="filters.birthday != null">
+                and birthday = ${symbol_pound}{filters.birthday}
+            </if>
+            <if test="filters.emailAddress != null and filters.emailAddress != ''">
+                and email_address like concat('%',${symbol_pound}{filters.emailAddress},'%')
+            </if>
+            <if test="filters.mobileNumber != null and filters.mobileNumber != ''">
+                and mobile_number like concat('%',${symbol_pound}{filters.mobileNumber},'%')
+            </if>
+            <if test="filters.identityCardNo != null and filters.identityCardNo != ''">
+                and identity_card_no like concat('%',${symbol_pound}{filters.identityCardNo},'%')
+            </if>
+        </where>
+    </sql>
+
+    <sql id="pageConditionOrderByAndLimitSql">
+        <if test="orderBy != null">
+            order by ${symbol_dollar}{orderBy} ${symbol_dollar}{orderSort}
+        </if>
+        limit ${symbol_pound}{startOffSet}, ${symbol_pound}{endOffSet}
+    </sql>
+
+    <!--通过PageCondition对象作为筛选条件查询-->
+    <select id="search" resultMap="PeopleMap">
+        select
+        <include refid="allSqlColumn"/>
+        from people
+        <include refid="pageConditionWhereSql"/>
+        <include refid="pageConditionOrderByAndLimitSql"/>
+    </select>
+
+    <select id="searchCount" resultType="java.lang.Integer">
+        select
+        count(*)
+        from people
+        <include refid="pageConditionWhereSql"/>
+    </select>
+</mapper>
+
