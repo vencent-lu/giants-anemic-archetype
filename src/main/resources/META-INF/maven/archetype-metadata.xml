@@ -4,6 +4,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
   <requiredProperties>
+    <requiredProperty key="giantsBootVersion">
+      <defaultValue>1.4.0</defaultValue>
+    </requiredProperty>
     <requiredProperty key="serverPort">
       <defaultValue>3001</defaultValue>
     </requiredProperty>
